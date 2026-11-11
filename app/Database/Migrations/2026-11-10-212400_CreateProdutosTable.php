@@ -33,6 +33,7 @@ class CreateProdutosTable extends Migration
             'preco' => [
                 'type' => 'DECIMAL',
                 'constraint' => '10,2',
+                'unsigned' => true,
             ],
             'estoque' => [
                 'type' => 'INT',
@@ -62,7 +63,7 @@ class CreateProdutosTable extends Migration
         ]);
 
         $this->forge->addKey('id', true);
-        $this->forge->addForeignKey('categoria_id', 'categorias', 'id');
+        $this->forge->addForeignKey('categoria_id', 'categorias', 'id', 'RESTRICT', 'RESTRICT');
         $this->forge->addUniqueKey('slug');
         $this->forge->addUniqueKey('sku');
         $this->forge->createTable('produtos', true);
