@@ -44,12 +44,19 @@ class ProdutoModel extends Model
         'slug' => 'required|max_length[150]|is_unique[produtos.slug]',
         'descricao' => 'permit_empty',
         'preco' => 'required|numeric|greater_than_equal_to[0]',
-        'estoque' => 'required|integer|greater_then_equal_to[0]',
+        'estoque' => 'required|integer|greater_than_equal_to[0]',
         'sku' => 'required|max_length[100]|is_unique[produtos.sku]',
         'imagem' => 'permit_empty|max_length[255]',
         'ativo' => 'in_list[0,1]',
     ];
-    protected $validationMessages   = [];
+    protected $validationMessages   = [
+        'slug' => [
+            'is_unique' => 'Esse slug já está cadastrado no sistema.',
+        ],
+        'sku' => [
+            'is_unique' => 'Esse sku já está cadastrado no sistema.',
+        ],
+    ];
     protected $skipValidation       = false;
     protected $cleanValidationRules = true;
 

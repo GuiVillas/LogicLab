@@ -12,7 +12,11 @@ class UsuarioModel extends Model
     protected $returnType       = 'array';
     protected $useSoftDeletes   = false;
     protected $protectFields    = true;
-    protected $allowedFields    = ['nome', 'email', 'senha'];
+    protected $allowedFields    = [
+        'nome',
+        'email',
+        'senha',
+    ];
 
     protected bool $allowEmptyInserts = false;
     protected bool $updateOnlyChanged = true;
@@ -28,19 +32,36 @@ class UsuarioModel extends Model
     protected $deletedField  = 'deleted_at';
 
     // Validation
-    protected $validationRules      = [];
-    protected $validationMessages   = [];
+    protected $validationRules      = [
+        'nome' => 'required|max_length[150]',
+        'email' => 'required|max_length[255]|min_length[8]|is_unique[usuarios.email]|valid_email',
+        'senha' => 'required|max_length[255]',
+    ];
+    protected $validationMessages   = [
+        'email' => [
+            'is_unique' => 'Este endereço de e-mail já está cadastrado no sistema.',
+            'valid_email' => 'Por favor, insira um endereço de e-mail valido.',
+        ],
+    ];
     protected $skipValidation       = false;
     protected $cleanValidationRules = true;
 
     // Callbacks
     protected $allowCallbacks = true;
-    protected $beforeInsert   = [];
+    protected $beforeInsert   = ['senhaHash'];
     protected $afterInsert    = [];
-    protected $beforeUpdate   = [];
+    protected $beforeUpdate   = ['senhaHash'];
     protected $afterUpdate    = [];
     protected $beforeFind     = [];
     protected $afterFind      = [];
     protected $beforeDelete   = [];
     protected $afterDelete    = [];
+
+    protected function senhaHash(array $data) {
+        if (!isset($data['data']['senha'])) {return $data;}
+
+        $data['data']['senha'] = password_hash($data['data']['senha'], PASSWORD_DEFAULT);
+
+        return $data;
+    }
 }
