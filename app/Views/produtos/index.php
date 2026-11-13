@@ -1,140 +1,114 @@
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Produtos</title>
+<?= $this->extend('layouts/main') ?>
 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
-</head>
-<body class="bg-light">
+<?= $this->section('titulo') ?>Produtos<?= $this->endSection() ?>
 
-<div class="container py-4">
+<?= $this->section('conteudo') ?>
 
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1 class="h3 mb-0">
-            <i class="bi bi-box-seam me-2"></i>Produtos
-        </h1>
-        <a href="#" class="btn btn-primary">
-            <i class="bi bi-plus-lg me-1"></i>Novo produto
-        </a>
+    <div class="row g-4">
+
+    <!-- Coluna dos filtros -->
+    <div class="col-lg-3">
+        <?= $this->include('components/filtros') ?>
     </div>
 
-    <div class="card shadow-sm">
-        <div class="card-body p-0">
+    <!-- Coluna dos produtos -->
+    <div class="col-lg-9">
 
-            <?php if (empty($produtos)): ?>
-                <div class="text-center text-muted py-5">
-                    <i class="bi bi-inbox display-4 d-block mb-2"></i>
-                    Nenhum produto cadastrado.
-                </div>
-            <?php else: ?>
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle mb-0">
-                        <thead class="table-light">
-                            <tr>
-                                <th scope="col" class="text-center" style="width: 80px;">Imagem</th>
-                                <th scope="col">Nome</th>
-                                <th scope="col">Categoria</th>
-                                <th scope="col">SKU</th>
-                                <th scope="col" class="text-end">Preço</th>
-                                <th scope="col" class="text-center">Estoque</th>
-                                <th scope="col" class="text-center">Status</th>
-                                <th scope="col" class="text-center">Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php foreach ($produtos as $produto): ?>
-                                <tr>
-                                    <td class="text-center">
-                                        <?php if (! empty($produto['imagem'])): ?>
-                                            <img src="<?= base_url(esc($produto['imagem'])) ?>"
-                                                 alt="<?= esc($produto['nome']) ?>"
-                                                 class="rounded border"
-                                                 style="width: 56px; height: 56px; object-fit: cover;">
-                                        <?php else: ?>
-                                            <div class="d-inline-flex align-items-center justify-content-center bg-secondary-subtle text-secondary rounded border"
-                                                 style="width: 56px; height: 56px;">
-                                                <i class="bi bi-image fs-4"></i>
-                                            </div>
-                                        <?php endif; ?>
-                                    </td>
+        <!-- botão que abre os filtros no mobile -->
+        <button class="btn btn-outline-dark rounded-0 d-lg-none mb-3" type="button"
+                data-bs-toggle="offcanvas" data-bs-target="#filtros" aria-controls="filtros">
+            <i class="bi bi-funnel me-1"></i>Filtros
+        </button>
 
-                                    <td>
-                                        <div class="fw-semibold"><?= esc($produto['nome']) ?></div>
-                                        <small class="text-muted"><?= esc($produto['slug']) ?></small>
-                                    </td>
+        <?php if (empty($produtos)): ?>
 
-                                    <td>
-                                        <?php if (! empty($produto['categorias_nome'])): ?>
-                                            <span class="badge text-bg-info">
-                                                <i class="bi bi-tag me-1"></i><?= esc($produto['categorias_nome']) ?>
-                                            </span>
-                                        <?php else: ?>
-                                            <span class="text-muted">—</span>
-                                        <?php endif; ?>
-                                    </td>
+            <div class="text-center text-muted border bg-white py-5">
+                <i class="bi bi-inbox display-4 d-block mb-2"></i>
+                Nenhum produto encontrado.
+            </div>
 
-                                    <td><code><?= esc($produto['sku']) ?></code></td>
+        <?php else: ?>
 
-                                    <td class="text-end">
+            <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-4 g-4">
+                <?php foreach ($produtos as $produto): ?>
+                    <?php
+                        $estoque = (int) $produto['estoque'];
+                        $ativo   = (int) $produto['ativo'] === 1;
+                    ?>
+                    <div class="col">
+                        <div class="card h-100 rounded-0 border bg-white shadow-none <?= $ativo ? '' : 'opacity-50' ?>">
+
+                            <!-- Imagem -->
+                            <div class="ratio ratio-1x1 border-bottom bg-body-secondary">
+                                <?php if (! empty($produto['imagem'])): ?>
+                                    <img src="<?= base_url(esc($produto['imagem'])) ?>"
+                                        alt="<?= esc($produto['nome']) ?>"
+                                        class="card-img-top rounded-0"
+                                        style="object-fit: cover;">
+                                <?php else: ?>
+                                    <div class="d-flex align-items-center justify-content-center text-secondary">
+                                        <i class="bi bi-image display-4"></i>
+                                    </div>
+                                <?php endif; ?>
+                            </div>
+
+                            <!-- Informações -->
+                            <div class="card-body d-flex flex-column">
+
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <small class="text-uppercase text-muted fw-semibold">
+                                        <?= esc($produto['categorias_nome'] ?? 'Sem categoria') ?>
+                                    </small>
+
+                                    <?php if (! $ativo): ?>
+                                        <span class="badge rounded-0 text-bg-secondary">Inativo</span>
+                                    <?php elseif ($estoque === 0): ?>
+                                        <span class="badge rounded-0 text-bg-danger">Esgotado</span>
+                                    <?php elseif ($estoque <= 5): ?>
+                                        <span class="badge rounded-0 text-bg-warning">Últimas unidades</span>
+                                    <?php endif; ?>
+                                </div>
+
+                                <h2 class="h6 fw-bold mb-1"><?= esc($produto['nome']) ?></h2>
+                                <small class="text-muted mb-3">SKU: <?= esc($produto['sku']) ?></small>
+
+                                <div class="mt-auto">
+                                    <div class="fs-4 fw-bold text-primary">
                                         R$ <?= number_format((float) $produto['preco'], 2, ',', '.') ?>
-                                    </td>
+                                    </div>
+                                    <small class="text-muted">
+                                        <i class="bi bi-box me-1"></i><?= $estoque ?> em estoque
+                                    </small>
+                                </div>
+                            </div>
 
-                                    <td class="text-center">
-                                        <?php if ((int) $produto['estoque'] === 0): ?>
-                                            <span class="badge text-bg-danger">Esgotado</span>
-                                        <?php elseif ((int) $produto['estoque'] <= 5): ?>
-                                            <span class="badge text-bg-warning"><?= (int) $produto['estoque'] ?></span>
-                                        <?php else: ?>
-                                            <span class="badge text-bg-success"><?= (int) $produto['estoque'] ?></span>
-                                        <?php endif; ?>
-                                    </td>
+                            <!-- Ações -->
+                            <div class="card-footer bg-white border-top rounded-0 p-3">
+                                <div class="d-flex gap-2">
+                                    <a href="#" class="btn btn-outline-dark rounded-0 flex-grow-1">
+                                        <i class="bi bi-eye me-1"></i>Detalhes
+                                    </a>
+                                    <button type="button"
+                                            class="btn btn-primary rounded-0"
+                                            title="Adicionar ao carrinho"
+                                            <?= ($estoque === 0 || ! $ativo) ? 'disabled' : '' ?>>
+                                        <i class="bi bi-cart-plus"></i>
+                                    </button>
+                                </div>
+                            </div>
 
-                                    <td class="text-center">
-                                        <?php if ((int) $produto['ativo'] === 1): ?>
-                                            <span class="badge text-bg-success">
-                                                <i class="bi bi-check-circle me-1"></i>Ativo
-                                            </span>
-                                        <?php else: ?>
-                                            <span class="badge text-bg-secondary">
-                                                <i class="bi bi-x-circle me-1"></i>Inativo
-                                            </span>
-                                        <?php endif; ?>
-                                    </td>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+            </div>
 
-                                    <td class="text-center">
-                                        <div class="btn-group btn-group-sm" role="group">
-                                            <a href="#" class="btn btn-outline-secondary" title="Visualizar">
-                                                <i class="bi bi-eye"></i>
-                                            </a>
-                                            <a href="#" class="btn btn-outline-primary" title="Editar">
-                                                <i class="bi bi-pencil-square"></i>
-                                            </a>
-                                            <a href="#" class="btn btn-outline-danger" title="Excluir">
-                                                <i class="bi bi-trash"></i>
-                                            </a>
-                                        </div>
-                                    </td>
-                                </tr>
-                            <?php endforeach; ?>
-                        </tbody>
-                    </table>
-                </div>
-            <?php endif; ?>
+        <?php endif; ?>
 
-        </div>
+        <?php if (isset($pager)): ?>
+            <div class="d-flex justify-content-center mt-5">
+                <?= $pager->links() ?>
+            </div>
+        <?php endif; ?>
     </div>
 
-    <?php if (isset($pager)): ?>
-        <div class="d-flex justify-content-center mt-4">
-            <?= $pager->links() ?>
-        </div>
-    <?php endif; ?>
-
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+<?= $this->endSection() ?>
